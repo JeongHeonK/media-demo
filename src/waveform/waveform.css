@@ -61,12 +61,14 @@ body {
   white-space: nowrap;
 }
 
-.waveform-picker {
-  justify-self: start;
+.waveform-picker,
+.waveform-sample {
   padding: 10px 18px;
   border: 1px solid var(--line);
   border-radius: 999px;
   background: var(--surface);
+  color: inherit;
+  font: inherit;
   font-weight: 600;
   cursor: pointer;
   transition:
@@ -75,20 +77,38 @@ body {
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .waveform-picker:hover {
+  .waveform-picker:hover,
+  .waveform-sample:hover {
     border-color: var(--muted);
   }
 }
 
 .waveform-picker:active,
+.waveform-sample:active,
 .waveform-play:active:not(:disabled) {
   transform: scale(0.97);
 }
 
 .waveform-picker:focus-within,
+.waveform-sample:focus-visible,
 .waveform-play:focus-visible {
   outline: 2px solid var(--focus);
   outline-offset: 2px;
+}
+
+.waveform-picker {
+  justify-self: start;
+}
+
+.waveform-samples {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.waveform-source {
+  overflow-wrap: anywhere;
 }
 
 .waveform-card {
@@ -191,6 +211,7 @@ body {
   }
 
   .waveform-picker:active,
+  .waveform-sample:active,
   .waveform-play:active:not(:disabled) {
     transform: none;
   }
