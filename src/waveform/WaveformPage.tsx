@@ -14,6 +14,12 @@ const PLAYHEAD_COLOR = "#e4572e";
 // Dark edge keeps the playhead >= 3:1 where it crosses the waveform.
 const PLAYHEAD_EDGE_COLOR = "#14202e";
 
+const SAMPLES = [
+  { file: "silence-then-sine.wav", label: "무음 → 사인파" },
+  { file: "speech.m4a", label: "음성" },
+  { file: "beats.m4a", label: "비트" },
+];
+
 export function WaveformPage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const audioRef = useRef<AudioContext | null>(null);
@@ -26,6 +32,7 @@ export function WaveformPage() {
   const pickRef = useRef(0);
   const [loaded, setLoaded] = useState(false);
   const [playing, setPlaying] = useState(false);
+  const [source, setSource] = useState("");
 
   useEffect(
     () => () => {
@@ -104,15 +111,29 @@ export function WaveformPage() {
     const file = e.target.files?.[0];
     // Without this, picking the same file again fires no change event.
     e.target.value = "";
+    if (!file) return;
+    await load(file.arrayBuffer(), file.name);
+  }
+
+  async function load(data: Promise<ArrayBuffer>, label: string) {
     const canvas = canvasRef.current;
-    if (!file || !canvas) return;
+    if (!canvas) return;
     const pick = ++pickRef.current;
     stop();
     offsetRef.current = 0;
     audioRef.current ??= new AudioContext();
-    const buffer = await audioRef.current.decodeAudioData(
-      await file.arrayBuffer(),
-    );
+    let buffer: AudioBuffer;
+    try {
+      buffer = await audioRef.current.decodeAudioData(await data);
+    } catch {
+      if (pick !== pickRef.current) return;
+      // Play may have been pressed on the previous file while this one loaded.
+      stop();
+      offsetRef.current = 0;
+      draw(0);
+      setSource(`불러오지 못했습니다: ${label}`);
+      return;
+    }
     if (pick !== pickRef.current) return;
     // Play may have been pressed on the previous file while this one decoded.
     stop();
@@ -135,6 +156,7 @@ export function WaveformPage() {
     waveRef.current = wave;
     draw(0);
     setLoaded(true);
+    setSource(`Loaded: ${label}`);
   }
 
   function togglePlay() {
@@ -184,6 +206,32 @@ export function WaveformPage() {
         />
         {loaded ? "Choose another file" : "Choose an audio file"}
       </label>
+      <div className="waveform-samples">
+        <span className="waveform-hint">Or try a sample:</span>
+        {SAMPLES.map(({ file, label }) => (
+          <button
+            key={file}
+            type="button"
+            className="waveform-sample"
+            onClick={() =>
+              load(
+                fetch(`${import.meta.env.BASE_URL}samples/${file}`).then(
+                  (r) => {
+                    if (!r.ok) throw new Error(`${r.status}`);
+                    return r.arrayBuffer();
+                  },
+                ),
+                label,
+              )
+            }
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+      {source ? (
+        <p className="waveform-hint waveform-source">{source}</p>
+      ) : null}
       <div className="waveform-card" data-loaded={loaded}>
         <canvas
           ref={canvasRef}
