@@ -1,0 +1,11 @@
+{
+	"files": {
+		"includes": [
+			"**",
+			"!dist",
+			"!node_modules",
+			"!.claude",
+			"!skills-lock.json"
+		]
+	}
+}
