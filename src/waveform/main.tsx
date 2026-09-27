@@ -4,7 +4,7 @@ import { WaveformPage } from "./WaveformPage";
 
 // biome-ignore lint/style/noNonNullAssertion: #root is in waveform/index.html
 createRoot(document.getElementById("root")!).render(
-	<StrictMode>
-		<WaveformPage />
-	</StrictMode>,
+  <StrictMode>
+    <WaveformPage />
+  </StrictMode>,
 );

@@ -1,197 +1,197 @@
 :root {
-	--bg: #f3f6f9;
-	--surface: #ffffff;
-	--ink: #14202e;
-	--muted: #5b6b7c;
-	--line: #d5dee7;
-	--grid: rgba(20, 32, 46, 0.06);
-	--focus: #2f6fd6;
-	--ease-out: cubic-bezier(0.23, 1, 0.32, 1);
-	color-scheme: light dark;
+  --bg: #f3f6f9;
+  --surface: #ffffff;
+  --ink: #14202e;
+  --muted: #5b6b7c;
+  --line: #d5dee7;
+  --grid: rgba(20, 32, 46, 0.06);
+  --focus: #2f6fd6;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  color-scheme: light dark;
 }
 
 @media (prefers-color-scheme: dark) {
-	:root {
-		--bg: #0f1a2b;
-		--surface: #16243a;
-		--ink: #e6edf5;
-		--muted: #93a4b8;
-		--line: #26364f;
-		--grid: rgba(230, 237, 245, 0.06);
-		--focus: #7fb0ff;
-	}
+  :root {
+    --bg: #0f1a2b;
+    --surface: #16243a;
+    --ink: #e6edf5;
+    --muted: #93a4b8;
+    --line: #26364f;
+    --grid: rgba(230, 237, 245, 0.06);
+    --focus: #7fb0ff;
+  }
 }
 
 body {
-	margin: 0;
-	background: var(--bg);
-	color: var(--ink);
-	font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-	line-height: 1.5;
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.5;
 }
 
 .waveform {
-	display: grid;
-	gap: 20px;
-	max-width: 880px;
-	margin: 0 auto;
-	padding: 48px 16px;
+  display: grid;
+  gap: 20px;
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 48px 16px;
 }
 
 .waveform-header h1 {
-	margin: 0;
-	font-size: clamp(1.75rem, 5vw, 2.5rem);
-	font-weight: 800;
-	letter-spacing: -0.03em;
-	line-height: 1.1;
+  margin: 0;
+  font-size: clamp(1.75rem, 5vw, 2.5rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
 }
 
 .waveform-header p {
-	margin: 8px 0 0;
-	max-width: 60ch;
-	color: var(--muted);
+  margin: 8px 0 0;
+  max-width: 60ch;
+  color: var(--muted);
 }
 
 .visually-hidden {
-	position: absolute;
-	width: 1px;
-	height: 1px;
-	overflow: hidden;
-	clip-path: inset(50%);
-	white-space: nowrap;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .waveform-picker {
-	justify-self: start;
-	padding: 10px 18px;
-	border: 1px solid var(--line);
-	border-radius: 999px;
-	background: var(--surface);
-	font-weight: 600;
-	cursor: pointer;
-	transition:
-		border-color 150ms var(--ease-out),
-		transform 160ms var(--ease-out);
+  justify-self: start;
+  padding: 10px 18px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    border-color 150ms var(--ease-out),
+    transform 160ms var(--ease-out);
 }
 
 @media (hover: hover) and (pointer: fine) {
-	.waveform-picker:hover {
-		border-color: var(--muted);
-	}
+  .waveform-picker:hover {
+    border-color: var(--muted);
+  }
 }
 
 .waveform-picker:active,
 .waveform-play:active:not(:disabled) {
-	transform: scale(0.97);
+  transform: scale(0.97);
 }
 
 .waveform-picker:focus-within,
 .waveform-play:focus-visible {
-	outline: 2px solid var(--focus);
-	outline-offset: 2px;
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
 }
 
 .waveform-card {
-	position: relative;
-	border: 1px solid var(--line);
-	border-radius: 14px;
-	overflow: hidden;
-	/* measurement-paper grid with a center axis behind the transparent canvas */
-	background:
-		linear-gradient(var(--line), var(--line)) center / 100% 1px no-repeat,
-		repeating-linear-gradient(90deg, var(--grid) 0 1px, transparent 1px 40px),
-		repeating-linear-gradient(0deg, var(--grid) 0 1px, transparent 1px 20px),
-		var(--surface);
+  position: relative;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  overflow: hidden;
+  /* measurement-paper grid with a center axis behind the transparent canvas */
+  background:
+    linear-gradient(var(--line), var(--line)) center / 100% 1px no-repeat,
+    repeating-linear-gradient(90deg, var(--grid) 0 1px, transparent 1px 40px),
+    repeating-linear-gradient(0deg, var(--grid) 0 1px, transparent 1px 20px),
+    var(--surface);
 }
 
 .waveform-canvas {
-	display: block;
-	width: 100%;
-	height: 180px;
-	cursor: pointer;
+  display: block;
+  width: 100%;
+  height: 180px;
+  cursor: pointer;
 }
 
 /* hidden (not display:none) so clientWidth is still measurable while the first draw lands */
 .waveform-card:not([data-loaded="true"]) .waveform-canvas {
-	visibility: hidden;
+  visibility: hidden;
 }
 
 .waveform-card[data-loaded="true"] .waveform-canvas {
-	animation: waveform-reveal 300ms var(--ease-out);
+  animation: waveform-reveal 300ms var(--ease-out);
 }
 
 @keyframes waveform-reveal {
-	from {
-		clip-path: inset(0 100% 0 0);
-	}
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
 }
 
 @keyframes waveform-fade {
-	from {
-		opacity: 0;
-	}
+  from {
+    opacity: 0;
+  }
 }
 
 .waveform-empty {
-	position: absolute;
-	inset: 0;
-	display: grid;
-	place-items: center;
-	margin: 0;
-	padding: 16px;
-	color: var(--muted);
-	text-align: center;
-	pointer-events: none;
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  padding: 16px;
+  color: var(--muted);
+  text-align: center;
+  pointer-events: none;
 }
 
 .waveform-controls {
-	display: flex;
-	flex-wrap: wrap;
-	align-items: center;
-	gap: 12px 16px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 16px;
 }
 
 .waveform-play {
-	min-width: 96px;
-	padding: 10px 22px;
-	border: 0;
-	border-radius: 999px;
-	background: var(--ink);
-	color: var(--bg);
-	font: inherit;
-	font-weight: 600;
-	cursor: pointer;
-	transition: transform 160ms var(--ease-out);
+  min-width: 96px;
+  padding: 10px 22px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--bg);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 160ms var(--ease-out);
 }
 
 .waveform-play:disabled {
-	opacity: 0.4;
-	cursor: not-allowed;
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .waveform-hint {
-	margin: 0;
-	color: var(--muted);
-	font-size: 0.875rem;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.875rem;
 }
 
 @media (max-width: 480px) {
-	.waveform {
-		padding-top: 32px;
-	}
+  .waveform {
+    padding-top: 32px;
+  }
 
-	.waveform-canvas {
-		height: 140px;
-	}
+  .waveform-canvas {
+    height: 140px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-	.waveform-card[data-loaded="true"] .waveform-canvas {
-		animation: waveform-fade 200ms ease-out;
-	}
+  .waveform-card[data-loaded="true"] .waveform-canvas {
+    animation: waveform-fade 200ms ease-out;
+  }
 
-	.waveform-picker:active,
-	.waveform-play:active:not(:disabled) {
-		transform: none;
-	}
+  .waveform-picker:active,
+  .waveform-play:active:not(:disabled) {
+    transform: none;
+  }
 }
