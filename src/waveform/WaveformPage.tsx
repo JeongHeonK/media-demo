@@ -1,12 +1,13 @@
 import {
   type ChangeEvent,
+  type KeyboardEvent,
   type MouseEvent,
   useEffect,
   useRef,
   useState,
 } from "react";
 import { computePeaks } from "./peaks";
-import { playbackTime, timeToX, xToTime } from "./timeline";
+import { keySeekTime, playbackTime, timeToX, xToTime } from "./timeline";
 import "./waveform.css";
 
 const WAVE_COLOR = "#14a38b";
@@ -77,6 +78,8 @@ export function WaveformPage() {
     );
     g.fillStyle = PLAYHEAD_COLOR;
     g.fillRect(x - devicePixelRatio, 0, 2 * devicePixelRatio, canvas.height);
+    canvas.setAttribute("aria-valuenow", time.toFixed(1));
+    canvas.setAttribute("aria-valuemax", buffer.duration.toFixed(1));
   }
 
   function start(offset: number) {
@@ -199,6 +202,15 @@ export function WaveformPage() {
     seekTo(xToTime(x, canvas.width, buffer.duration));
   }
 
+  function handleKeySeek(e: KeyboardEvent<HTMLCanvasElement>) {
+    const buffer = bufferRef.current;
+    if (!buffer) return;
+    const time = keySeekTime(e.key, currentTime(), buffer.duration);
+    if (time === null) return;
+    e.preventDefault();
+    seekTo(time);
+  }
+
   function seekTo(time: number) {
     if (sourceRef.current) {
       sourceRef.current.stop();
@@ -258,6 +270,13 @@ export function WaveformPage() {
           ref={canvasRef}
           className="waveform-canvas"
           onClick={handleSeek}
+          onKeyDown={handleKeySeek}
+          tabIndex={loaded ? 0 : -1}
+          role="slider"
+          aria-label="재생 위치"
+          // draw() updates aria-valuenow and aria-valuemax; React never changes these initial values.
+          aria-valuenow={0}
+          aria-valuemin={0}
         />
         {loaded ? null : (
           <p className="waveform-empty">Your waveform will appear here.</p>

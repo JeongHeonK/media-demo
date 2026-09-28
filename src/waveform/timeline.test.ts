@@ -36,8 +36,11 @@ test("화살표로 이동해도 0 보다 앞이나 전체 길이보다 뒤로 �
   expect(keySeekTime("ArrowRight", 19.5, 20)).toBe(20);
 });
 
-test("Home 은 처음으로, End 는 끝으로 이동하고 다른 키는 무시한다", () => {
+test("Home 은 처음으로, End 는 끝으로 이동한다", () => {
   expect(keySeekTime("Home", 7, 20)).toBe(0);
   expect(keySeekTime("End", 7, 20)).toBe(20);
+});
+
+test("이동 키가 아니면 null 을 돌려준다", () => {
   expect(keySeekTime("a", 7, 20)).toBeNull();
 });

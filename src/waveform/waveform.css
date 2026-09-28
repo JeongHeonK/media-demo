@@ -91,9 +91,15 @@ body {
 
 .waveform-picker:focus-within,
 .waveform-sample:focus-visible,
-.waveform-play:focus-visible {
+.waveform-play:focus-visible,
+.waveform-canvas:focus-visible {
   outline: 2px solid var(--focus);
   outline-offset: 2px;
+}
+
+/* The card clips overflow, so draw the ring inside the canvas. */
+.waveform-canvas:focus-visible {
+  outline-offset: -2px;
 }
 
 .waveform-picker {
