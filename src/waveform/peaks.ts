@@ -1,9 +1,10 @@
 export function computePeaks(
-  samples: Float32Array,
+  channels: Float32Array[],
   buckets: number,
 ): { min: Float32Array; max: Float32Array } {
   const min = new Float32Array(buckets);
   const max = new Float32Array(buckets);
+  const samples = channels[0];
   const n = samples.length;
   if (n === 0) return { min, max };
   for (let i = 0; i < buckets; i++) {

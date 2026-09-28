@@ -147,13 +147,19 @@ export function WaveformPage() {
     stop();
     offsetRef.current = 0;
     bufferRef.current = buffer;
+    renderWave(canvas, buffer);
+    draw(0);
+    setLoaded(true);
+    setSource(`Loaded: ${label}`);
+  }
 
+  function renderWave(canvas: HTMLCanvasElement, buffer: AudioBuffer) {
     canvas.width = canvas.clientWidth * devicePixelRatio;
     canvas.height = canvas.clientHeight * devicePixelRatio;
     const wave = new OffscreenCanvas(canvas.width, canvas.height);
     const g = wave.getContext("2d");
     if (!g) return;
-    const { min, max } = computePeaks(buffer.getChannelData(0), wave.width);
+    const { min, max } = computePeaks([buffer.getChannelData(0)], wave.width);
     const half = wave.height / 2;
     g.fillStyle = WAVE_COLOR;
     for (let x = 0; x < wave.width; x++) {
@@ -162,9 +168,6 @@ export function WaveformPage() {
       g.fillRect(x, top, 1, Math.max(1, bottom - top));
     }
     waveRef.current = wave;
-    draw(0);
-    setLoaded(true);
-    setSource(`Loaded: ${label}`);
   }
 
   function togglePlay() {
@@ -186,7 +189,10 @@ export function WaveformPage() {
     if (!buffer) return;
     const rect = canvas.getBoundingClientRect();
     const x = ((e.clientX - rect.left) * canvas.width) / rect.width;
-    const time = xToTime(x, canvas.width, buffer.duration);
+    seekTo(xToTime(x, canvas.width, buffer.duration));
+  }
+
+  function seekTo(time: number) {
     if (sourceRef.current) {
       sourceRef.current.stop();
       start(time);
