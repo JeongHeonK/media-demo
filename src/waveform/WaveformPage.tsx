@@ -48,6 +48,26 @@ export function WaveformPage() {
     [],
   );
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: renderWave and draw read only refs, so the first render's copies stay correct.
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const observer = new ResizeObserver(() => {
+      const buffer = bufferRef.current;
+      if (!buffer) return;
+      if (
+        canvas.width === canvas.clientWidth * devicePixelRatio &&
+        canvas.height === canvas.clientHeight * devicePixelRatio
+      )
+        return;
+      renderWave(canvas, buffer);
+      // While playing, the next tick redraws.
+      if (!sourceRef.current) draw(offsetRef.current);
+    });
+    observer.observe(canvas);
+    return () => observer.disconnect();
+  }, []);
+
   function currentTime() {
     const audio = audioRef.current;
     const buffer = bufferRef.current;
