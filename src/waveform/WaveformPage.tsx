@@ -138,7 +138,9 @@ export function WaveformPage() {
       // Play may have been pressed on the previous file while this one loaded.
       stop();
       offsetRef.current = 0;
-      draw(0);
+      bufferRef.current = null;
+      waveRef.current = null;
+      setLoaded(false);
       setSource(`불러오지 못했습니다: ${label}`);
       return;
     }
