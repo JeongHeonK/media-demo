@@ -34,3 +34,11 @@ test("빈 샘플이면 min 과 max 가 모두 0 이다", () => {
   expect(Array.from(min)).toEqual([0, 0, 0]);
   expect(Array.from(max)).toEqual([0, 0, 0]);
 });
+
+test("스테레오면 구간마다 두 채널 중 가장 큰 값과 가장 작은 값을 쓴다", () => {
+  const left = Float32Array.of(0.2, 0.1);
+  const right = Float32Array.of(0.8, -0.6);
+  const { min, max } = computePeaks([left, right], 1);
+  expect(max[0]).toBeCloseTo(0.8);
+  expect(min[0]).toBeCloseTo(-0.6);
+});

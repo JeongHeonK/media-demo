@@ -159,7 +159,12 @@ export function WaveformPage() {
     const wave = new OffscreenCanvas(canvas.width, canvas.height);
     const g = wave.getContext("2d");
     if (!g) return;
-    const { min, max } = computePeaks([buffer.getChannelData(0)], wave.width);
+    const { min, max } = computePeaks(
+      Array.from({ length: buffer.numberOfChannels }, (_, c) =>
+        buffer.getChannelData(c),
+      ),
+      wave.width,
+    );
     const half = wave.height / 2;
     g.fillStyle = WAVE_COLOR;
     for (let x = 0; x < wave.width; x++) {
