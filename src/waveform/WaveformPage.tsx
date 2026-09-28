@@ -44,6 +44,8 @@ export function WaveformPage() {
     () => () => {
       cancelAnimationFrame(rafRef.current);
       sourceRef.current?.stop();
+      void audioRef.current?.close();
+      audioRef.current = null;
     },
     [],
   );
