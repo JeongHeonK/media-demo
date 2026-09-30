@@ -20,6 +20,11 @@ const SAMPLES = [
   { file: "beats.m4a", label: "비트" },
 ];
 
+// Audio Session API (Safari 17+) is not in the TypeScript DOM lib yet.
+type NavigatorWithAudioSession = Navigator & {
+  audioSession?: { type: string };
+};
+
 export function WaveformPage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const audioRef = useRef<AudioContext | null>(null);
@@ -121,6 +126,9 @@ export function WaveformPage() {
     const pick = ++pickRef.current;
     stop();
     offsetRef.current = 0;
+    // iOS defaults Web Audio to "ambient", which the silent switch mutes.
+    const session = (navigator as NavigatorWithAudioSession).audioSession;
+    if (session) session.type = "playback";
     audioRef.current ??= new AudioContext();
     let buffer: AudioBuffer;
     try {
