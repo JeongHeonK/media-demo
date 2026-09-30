@@ -8,11 +8,12 @@ https://jeongheonk.github.io/media-demo/waveform/
 
 ```
 File / 샘플 fetch -> ArrayBuffer
-  -> decodeAudioData -> getChannelData(0)
-  -> computePeaks(samples, canvas.width)   // 픽셀마다 min, max
+  -> decodeAudioData -> 채널마다 getChannelData(c)
+  -> computePeaks(channels, canvas.width)  // 픽셀마다 전체 채널의 min, max
   -> OffscreenCanvas 에 한 번 그림
   -> RAF: drawImage + 재생 위치선 (AudioContext.currentTime 기준)
   -> 클릭: xToTime 으로 seek, 새 AudioBufferSourceNode.start(0, offset)
+  -> 키보드: 화살표 ±5%, Home/End (keySeekTime)
 ```
 
 - `src/waveform/peaks.ts`, `timeline.ts`: 순수 함수이며 Vitest 로 테스트합니다.

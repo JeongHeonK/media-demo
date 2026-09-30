@@ -1,12 +1,13 @@
 import {
   type ChangeEvent,
+  type KeyboardEvent,
   type MouseEvent,
   useEffect,
   useRef,
   useState,
 } from "react";
 import { computePeaks } from "./peaks";
-import { playbackTime, timeToX, xToTime } from "./timeline";
+import { keySeekTime, playbackTime, timeToX, xToTime } from "./timeline";
 import "./waveform.css";
 
 const WAVE_COLOR = "#14a38b";
@@ -43,9 +44,31 @@ export function WaveformPage() {
     () => () => {
       cancelAnimationFrame(rafRef.current);
       sourceRef.current?.stop();
+      void audioRef.current?.close();
+      audioRef.current = null;
     },
     [],
   );
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: renderWave and draw read only refs, so the first render's copies stay correct.
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const observer = new ResizeObserver(() => {
+      const buffer = bufferRef.current;
+      if (!buffer) return;
+      if (
+        canvas.width === canvas.clientWidth * devicePixelRatio &&
+        canvas.height === canvas.clientHeight * devicePixelRatio
+      )
+        return;
+      renderWave(canvas, buffer);
+      // While playing, the next tick redraws.
+      if (!sourceRef.current) draw(offsetRef.current);
+    });
+    observer.observe(canvas);
+    return () => observer.disconnect();
+  }, []);
 
   function currentTime() {
     const audio = audioRef.current;
@@ -77,6 +100,8 @@ export function WaveformPage() {
     );
     g.fillStyle = PLAYHEAD_COLOR;
     g.fillRect(x - devicePixelRatio, 0, 2 * devicePixelRatio, canvas.height);
+    canvas.setAttribute("aria-valuenow", time.toFixed(1));
+    canvas.setAttribute("aria-valuemax", buffer.duration.toFixed(1));
   }
 
   function start(offset: number) {
@@ -138,7 +163,9 @@ export function WaveformPage() {
       // Play may have been pressed on the previous file while this one loaded.
       stop();
       offsetRef.current = 0;
-      draw(0);
+      bufferRef.current = null;
+      waveRef.current = null;
+      setLoaded(false);
       setSource(`불러오지 못했습니다: ${label}`);
       return;
     }
@@ -147,13 +174,24 @@ export function WaveformPage() {
     stop();
     offsetRef.current = 0;
     bufferRef.current = buffer;
+    renderWave(canvas, buffer);
+    draw(0);
+    setLoaded(true);
+    setSource(`Loaded: ${label}`);
+  }
 
+  function renderWave(canvas: HTMLCanvasElement, buffer: AudioBuffer) {
     canvas.width = canvas.clientWidth * devicePixelRatio;
     canvas.height = canvas.clientHeight * devicePixelRatio;
     const wave = new OffscreenCanvas(canvas.width, canvas.height);
     const g = wave.getContext("2d");
     if (!g) return;
-    const { min, max } = computePeaks(buffer.getChannelData(0), wave.width);
+    const { min, max } = computePeaks(
+      Array.from({ length: buffer.numberOfChannels }, (_, c) =>
+        buffer.getChannelData(c),
+      ),
+      wave.width,
+    );
     const half = wave.height / 2;
     g.fillStyle = WAVE_COLOR;
     for (let x = 0; x < wave.width; x++) {
@@ -162,9 +200,6 @@ export function WaveformPage() {
       g.fillRect(x, top, 1, Math.max(1, bottom - top));
     }
     waveRef.current = wave;
-    draw(0);
-    setLoaded(true);
-    setSource(`Loaded: ${label}`);
   }
 
   function togglePlay() {
@@ -186,7 +221,19 @@ export function WaveformPage() {
     if (!buffer) return;
     const rect = canvas.getBoundingClientRect();
     const x = ((e.clientX - rect.left) * canvas.width) / rect.width;
-    const time = xToTime(x, canvas.width, buffer.duration);
+    seekTo(xToTime(x, canvas.width, buffer.duration));
+  }
+
+  function handleKeySeek(e: KeyboardEvent<HTMLCanvasElement>) {
+    const buffer = bufferRef.current;
+    if (!buffer) return;
+    const time = keySeekTime(e.key, currentTime(), buffer.duration);
+    if (time === null) return;
+    e.preventDefault();
+    seekTo(time);
+  }
+
+  function seekTo(time: number) {
     if (sourceRef.current) {
       sourceRef.current.stop();
       start(time);
@@ -245,6 +292,13 @@ export function WaveformPage() {
           ref={canvasRef}
           className="waveform-canvas"
           onClick={handleSeek}
+          onKeyDown={handleKeySeek}
+          tabIndex={loaded ? 0 : -1}
+          role="slider"
+          aria-label="재생 위치"
+          // draw() updates aria-valuenow and aria-valuemax; React never changes these initial values.
+          aria-valuenow={0}
+          aria-valuemin={0}
         />
         {loaded ? null : (
           <p className="waveform-empty">Your waveform will appear here.</p>
